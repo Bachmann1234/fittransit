@@ -3,5 +3,8 @@
     "jest": "^21.1.0",
     "nock": "^9.0.20",
     "node-fetch": "^1.7.3"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }

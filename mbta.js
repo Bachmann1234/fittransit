@@ -1,12 +1,5 @@
 const fetch = require("node-fetch");
 
-const groupBy = function (xs, key) {
-    return xs.reduce(function (rv, x) {
-        (rv[x[key]] = rv[x[key]] || []).push(x);
-        return rv;
-    }, {});
-};
-
 class MbtaAPI {
     constructor(apiKey) {
         if (apiKey !== undefined) {
@@ -28,25 +21,51 @@ class MbtaAPI {
 
     static parseTrip(trip) {
         return {
-            'headsign': trip.trip_headsign,
-            'secondsUntilArrival': trip.pre_away
+            "headsign": trip.trip_headsign,
+            "secondsUntilArrival": parseInt(trip.pre_away)
         }
     }
 
+
+    static parseDirection(direction) {
+        return direction.trip.map((t) => this.parseTrip(t));
+    }
+
+    static parseRoute(route) {
+        return {
+            [route.route_id]: route.direction.map(
+                (d) => this.parseDirection(d)
+            ).reduce(
+                (d1, d2) => { return d1.concat(d2) },
+                []
+            )
+        };
+    }
+
+    static parseMode(mode) {
+        return mode.route.map((r) => this.parseRoute(r)).reduce(
+            (r1, r2) => {
+                Object.keys(r2).forEach((k) => {
+                    if (r1.hasOwnProperty(k)) {
+                        r1[k] = r1[k.concat(r2[k])]
+                    } else {
+                        r1[k] = r2[k]
+                    }
+                });
+                return r1;
+            },
+            {}
+        )
+    }
+
+    static parseStop(stop) {
+
+    }
+
     static parsePredictions(stopsResponse) {
-        //todo: handle arrays
-        // Modes: busses and subways come together
-        // there are many routes pir mode
-        // Break down by "mode", "route", "direction"
-        return groupBy(stopsResponse.map(function(stop) {
-            return {
-                'stopName': stop.stop_name,
-                'transitType': stop.mode[0].mode_name,
-                'name': stop.mode[0].route[0].route_name,
-                'direction': stop.mode[0].route[0].direction[0].direction_name,
-                'trips': stop.mode[0].route[0].direction[0].trip.map(MbtaAPI.parseTrip)
-            }
-        }), 'name');
+        let result = {};
+
+        return result;
     }
 
     nearbyBusStops(lat, long) {
@@ -62,7 +81,6 @@ class MbtaAPI {
     }
 
     predictionForStop(stop) {
-        console.log(stop);
         let url = this.predictionUrl(stop['stop_id']);
         return fetch(url).then(function(response) {
             return response.json();
@@ -75,4 +93,5 @@ Promise.resolve(new MbtaAPI().nearbyBusStops(42.4114684, -71.1264738).then(funct
     console.log(Object.keys(data));
 }));
 
+module.exports = MbtaAPI;
 
