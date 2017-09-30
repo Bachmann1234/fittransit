@@ -13,8 +13,33 @@ function combineObjectWithArrayProperties(o1, o2) {
     return o1;
 }
 
-function invertRoutesWithStops(parsedMBTAroutes) {
-    return {};
+function invertRoutesWithStops(parsedMBTARoutes) {
+    let unique_stops = new Set(
+        Object.keys(parsedMBTARoutes).map(
+            (route) => {
+                return Object.keys(parsedMBTARoutes[route]);
+            }
+        ).reduce((a, b) => a.concat(b), [])
+    );
+    let result = {};
+    unique_stops.forEach(
+        (stop_name) => {
+            Object.keys(parsedMBTARoutes).forEach(
+                (route_name) => {
+                   if(result.hasOwnProperty(stop_name)) {
+                       if (result[stop_name].hasOwnProperty(route_name)) {
+                           result[stop_name][route_name].concat(parsedMBTARoutes[route_name][stop_name]);
+                       } else {
+                           result[stop_name][route_name] = parsedMBTARoutes[route_name][stop_name];
+                       }
+                   } else {
+                       result[stop_name] = {[route_name] : parsedMBTARoutes[route_name][stop_name]};
+                   }
+                }
+            )
+        }
+    );
+    return result
 }
 
 function nearbyBusStopUrl(lat, lon, apiKey) {
@@ -115,16 +140,9 @@ function predictionForStop(stop, apiKey) {
     });
 }
 
-// Promise.resolve(
-//     new MbtaAPI().nearbyBusStops(42.4114684, -71.1264738).then(
-//         function(data) {
-//             console.log(JSON.stringify(data, null, 2));
-//         }
-//     )
-// );
-
 module.exports = {
-    nearbyBusStops
+    nearbyBusStops,
+    invertRoutesWithStops
 };
 
 if (process.env.NODE_ENV === 'test') {

@@ -394,3 +394,124 @@ test('Extract Required Data From List Of Predictions', () => {
          }
      })
 });
+
+test('Extract Required Data From List Of Predictions', () => {
+    expect(mbta.invertRoutesWithStops({
+        "80": {
+            "Boston Ave @ Hillsdale Rd": [
+                {
+                    headsign: "Lechmere",
+                    secondsUntilArrival: 3648,
+                }
+            ],
+            "Boston Ave @ Piggott Rd": [
+                {
+                    headsign: "Arlington Center",
+                    secondsUntilArrival: 2200,
+                }
+            ],
+            "Boston Ave @ Winthrop St": [
+                {
+                    headsign: "Lechmere",
+                    secondsUntilArrival: 3692,
+                }
+            ]
+        },
+        "94": {
+            "Boston Ave @ Hillsdale Rd": [
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 330,
+                },
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 3855,
+                },
+            ],
+            "Boston Ave @ Piggott Rd": [
+                {
+                    headsign: "Medford Square",
+                    secondsUntilArrival: 1169,
+                }
+            ],
+            "Boston Ave @ Winthrop St": [
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 359,
+                },
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 3884,
+                }
+            ]
+        },
+        "96": {
+            "Boston Ave @ Winthrop St": [
+                {
+                    headsign: "Harvard",
+                    secondsUntilArrival: 675,
+                }
+            ]
+        }
+    })).toEqual({
+        "Boston Ave @ Hillsdale Rd": {
+            "80": [
+                {
+                    headsign: "Lechmere",
+                    secondsUntilArrival: 3648,
+                }
+            ],
+            "94": [
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 330,
+                },
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 3855,
+                }
+            ]
+
+        },
+        "Boston Ave @ Piggott Rd": {
+            "80": [
+                {
+                    headsign: "Arlington Center",
+                    secondsUntilArrival: 2200,
+                },
+
+            ],
+            "94": [
+                {
+                    headsign: "Medford Square",
+                    secondsUntilArrival: 1169,
+                }
+            ]
+
+        },
+        "Boston Ave @ Winthrop St": {
+            "80": [
+                {
+                    headsign: "Lechmere",
+                    secondsUntilArrival: 3692,
+                }
+            ],
+            "94": [
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 359,
+                },
+                {
+                    headsign: "Davis",
+                    secondsUntilArrival: 3884,
+                }
+            ],
+            "96": [
+                {
+                    headsign: "Harvard",
+                    secondsUntilArrival: 675,
+                }
+            ]
+        }
+    })
+});
