@@ -13,12 +13,10 @@ beforeAll(() => {
     })
 });
 
-//pre away
-api = new mbta();
 
 test("Extract trip data", () => {
    expect(
-       mbta.parseTrip({
+      mbta.parseTrip({
            "trip_id": "34982499",
            "trip_name": "9:15 pm from Medford Sq @ City Hall Parking lot to Davis Square Busway",
            "trip_headsign": "Davis",
