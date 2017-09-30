@@ -1,5 +1,16 @@
 const fetch = require("node-fetch");
 
+function combineObjectWithArrayProperties(o1, o2) {
+    Object.keys(o2).forEach((k) => {
+        if (o1.hasOwnProperty(k)) {
+            o1[k] = o1[k.concat(o2[k])]
+        } else {
+            o1[k] = o2[k]
+        }
+    });
+    return o1;
+}
+
 class MbtaAPI {
     constructor(apiKey) {
         if (apiKey !== undefined) {
@@ -43,29 +54,47 @@ class MbtaAPI {
     }
 
     static parseMode(mode) {
-        return mode.route.map((r) => this.parseRoute(r)).reduce(
-            (r1, r2) => {
-                Object.keys(r2).forEach((k) => {
-                    if (r1.hasOwnProperty(k)) {
-                        r1[k] = r1[k.concat(r2[k])]
-                    } else {
-                        r1[k] = r2[k]
-                    }
-                });
-                return r1;
-            },
+        return mode.route.map(
+            (r) => this.parseRoute(r)
+        ).reduce(
+            combineObjectWithArrayProperties,
             {}
         )
     }
 
     static parseStop(stop) {
-
+        let stopName = stop.stop_name;
+        let combinedModes = stop.mode.map(
+            (m) => this.parseMode(m)
+        ).reduce(
+            combineObjectWithArrayProperties,
+            {}
+        );
+        let result = {};
+        Object.keys(combinedModes).forEach((route) => {
+            result[route] = {
+                [stopName] : combinedModes[route]
+            }
+        });
+        return result;
     }
 
     static parsePredictions(stopsResponse) {
-        let result = {};
-
-        return result;
+        return stopsResponse.map(
+            (s) => MbtaAPI.parseStop(s)
+        ).reduce(
+            (s1, s2) => {
+                Object.keys(s2).forEach((k) => {
+                    if (s1.hasOwnProperty(k)) {
+                        s1[k] = combineObjectWithArrayProperties(s1[k], s2[k]);
+                    } else {
+                        s1[k] = s2[k]
+                    }
+                });
+                return s1;
+            },
+            {}
+        );
     }
 
     nearbyBusStops(lat, long) {
@@ -88,10 +117,13 @@ class MbtaAPI {
     }
 }
 
-Promise.resolve(new MbtaAPI().nearbyBusStops(42.4114684, -71.1264738).then(function(data) {
-    // console.log(JSON.stringify(data, null, 2));
-    console.log(Object.keys(data));
-}));
+Promise.resolve(
+    new MbtaAPI().nearbyBusStops(42.4114684, -71.1264738).then(
+        function(data) {
+            console.log(JSON.stringify(data, null, 2));
+        }
+    )
+);
 
 module.exports = MbtaAPI;
 
